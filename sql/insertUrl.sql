@@ -1,0 +1,1 @@
+INSERT INTO url(original,short) VALUES($1,$2)
