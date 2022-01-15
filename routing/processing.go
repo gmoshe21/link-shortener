@@ -3,6 +3,7 @@ package routing
 import (
 	"link-shortener/conn"
 	_ "link-shortener/conn"
+	"link-shortener/utils"
 	//"crypto/sha256"
 	"log"
 
@@ -24,14 +25,16 @@ func getShortUrl(ctx *fasthttp.RequestCtx) {
 			log.Println(err)
 		}
 		if shortUrl == "" {
-			shortUrl = url // create short H256
+			shortUrl = utils.GenerateShortUrl()
+			// TODO check original short url
 			conn.DB.QueryRow(conn.InsertUrl, url, shortUrl)
 		}
 	} else {
 		// todo insert map
 		shortUrl = conn.Data[url]
 		if shortUrl == "" {
-			shortUrl = url // create short
+			// TODO check original short url
+			shortUrl = utils.GenerateShortUrl()
 			conn.Data[url] = shortUrl;
 		}
 	}
