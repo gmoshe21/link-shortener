@@ -3,6 +3,7 @@ package routing
 import (
 	"link-shortener/conn"
 	_ "link-shortener/conn"
+	//"crypto/sha256"
 	"log"
 
 
@@ -23,7 +24,7 @@ func getShortUrl(ctx *fasthttp.RequestCtx) {
 			log.Println(err)
 		}
 		if shortUrl == "" {
-			shortUrl = url // create short
+			shortUrl = url // create short H256
 			conn.DB.QueryRow(conn.InsertUrl, url, shortUrl)
 		}
 	} else {
@@ -51,17 +52,17 @@ func getOriginalUrl(ctx *fasthttp.RequestCtx) {
 		if err != nil {
 			// todo response error
 			log.Println(err)
+			ctx.Error("Status not found", 404)
 		}
 	} else {
-		// todo insert map
-		for value, key := range conn.Data {
+		for key, value := range conn.Data {
 			if value == shortUrl {
 				url = key
 				break
 			}
 		}
 		if url == "" {
-			// error not found
+			ctx.Error("Status not found", 404)
 		}
 	}
 	ctx.Response.SetBody([]byte(url))
