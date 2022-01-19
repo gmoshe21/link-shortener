@@ -29,7 +29,7 @@ func getShortUrl(ctx *fasthttp.RequestCtx) {
 				shortUrl = utils.GenerateShortUrl() //генерация ключа
 
 				var checkUrl string
-				row = conn.DB.QueryRow(conn.CheckShortUrl, shortUrl) // проверка на уникальность ключаа
+				row = conn.DB.QueryRow(conn.CheckShortUrl, shortUrl) // проверка на уникальность ключа
 				err = row.Scan(&shortUrl)
 
 				if err != nil && err.Error() != "sql: no rows in result set" {
@@ -51,7 +51,7 @@ func getShortUrl(ctx *fasthttp.RequestCtx) {
 				shortUrl = utils.GenerateShortUrl() // генерация ключа
 				for _, value := range conn.Data { // проверка на уникальность ключа
 					if value == shortUrl {
-						shortUrl = "" // если ключ найден в памяти, то он стирается
+						shortUrl = ""
 						break
 					}
 				}
