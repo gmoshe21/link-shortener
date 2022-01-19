@@ -16,6 +16,6 @@ func GenerateShortUrl() string{
 	for i := 0; i < length; i++ {
 		b.WriteRune(chars[rand.Intn(len(chars))])
 	}
-	str := b.String() // Например "ExcbsVQs"
+	str := b.String() // Например "ExcbsVQ_"
 	return str
 }

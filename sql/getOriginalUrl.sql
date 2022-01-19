@@ -1,0 +1,1 @@
+SELECT original FROM url WHERE short = $1

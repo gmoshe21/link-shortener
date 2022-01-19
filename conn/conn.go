@@ -3,54 +3,37 @@ package conn
 import (
 	"io/ioutil"
 	"log"
-	"os/exec"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 const (
-	createDataBase = "sql/createDataBase.sql"
 	createTable = "sql/createTable.sql"
 	getShortUrl = "sql/getShortUrl.sql"
+	getOriginalUrl = "sql/getOriginalUrl.sql"
 	insertUrl = "sql/insertUrl.sql"
+	checkShortUrl = "sql/checkShortUrl.sql"
 )
 
 var (
-	CreateBD string
 	CreateTable string
 	GetShortUrl string
+	GetOriginalUrl string
 	InsertUrl string
+	CheckShortUrl string
+
+	ServAddr string
+	Memory string
 )
 
-var Memory = "in-memory"
 var DB *sqlx.DB
 var Data map[string]string
 
-func createDB() {
-	cmd := exec.Command("psql", "-d", "database_name", "-f", "path/to/database.sql")
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	if err := cmd.Start(); err != nil {
-		log.Panicln(err)
-	}
-
-	errout, _ := ioutil.ReadAll(stderr)
-	if err := cmd.Wait(); err != nil {
-		log.Println(errout)
-		log.Panicln(err)
-	}
-}
-
 func init() {
-	// data, err := ioutil.ReadFile(createDataBase)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
-	// CreateBD = string(data);
+	Data = make(map[string]string)
 
 	data, err := ioutil.ReadFile(createTable)
 	if err != nil {
@@ -64,15 +47,69 @@ func init() {
 	}
 	GetShortUrl = string(data);
 
+	data, err = ioutil.ReadFile(getOriginalUrl)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetOriginalUrl = string(data);
+
 	data, err = ioutil.ReadFile(insertUrl)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	InsertUrl = string(data);
 
-	//createDB()
+	data, err = ioutil.ReadFile(checkShortUrl)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	CheckShortUrl = string(data);
+
+	err = godotenv.Load("arg.env")
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	ServAddr = os.Getenv("SERV_ADDR")
+	if ServAddr == "" {
+		ServAddr = "127.0.0.1:5000"
+	}
+
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "127.0.0.1"
+	}
+
+	port := os.Getenv("DB_PORT")
+	if port == "" {
+		port = "5432"
+	}
+
+	user := os.Getenv("DB_USERNAME")
+	if user == "" {
+		user = "url_shortened"
+	}
+
+	password := os.Getenv("DB_PASSWORD")
+	if password == "" {
+		password = "url_shortened"
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "url_shortened"
+	}
+
+	Memory = os.Getenv("MEMORY")
+	if Memory == "" {
+		Memory = "in-memory"
+	} else if Memory != "in-memory" && Memory != "postgres" {
+		log.Panicln("service does not support " + Memory + " storage")
+	}
+
 	if Memory == "postgres" {
-		DB, err = sqlx.Open("postgres", "user=url_shortened password=url_shortened dbname=url_shortened sslmode=disable");
+		DB, err = sqlx.Open("postgres", "host="+host+" port="+port+" user="+user+" password="+password+" dbname="+dbName+" sslmode=disable");
 		if err != nil {
 			log.Panicln(err)
 		}
@@ -80,6 +117,6 @@ func init() {
 		if err != nil {
 			log.Panicln(err)
 		}
-		// DB.MustExec(CreateTable)
+		DB.MustExec(CreateTable)
 	}
 }

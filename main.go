@@ -5,6 +5,6 @@ import (
 	"link-shortener/routing"
 )
 
-func main(){
+func main() {
 	routing.StartHttp()
 }

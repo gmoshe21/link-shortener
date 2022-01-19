@@ -1,8 +1,10 @@
 package routing
 
 import (
-	"github.com/valyala/fasthttp"
+	"link-shortener/conn"
 	"log"
+
+	"github.com/valyala/fasthttp"
 )
 
 func StartHttp() {
@@ -48,8 +50,8 @@ func StartHttp() {
 		}
 		*/
 	}
-
-	err := fasthttp.ListenAndServe("127.0.0.1:5000", handler)
+	log.Println("Server start")
+	err := fasthttp.ListenAndServe(conn.ServAddr, handler)
 	if err != nil {
 		log.Println(err)
 	}

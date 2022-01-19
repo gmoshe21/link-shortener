@@ -1,0 +1,1 @@
+SELECT short FROM url WHERE short = $1
